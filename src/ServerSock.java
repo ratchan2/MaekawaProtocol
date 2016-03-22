@@ -7,9 +7,9 @@ public class ServerSock implements Runnable{
 	Socket socket;
 	TCPServer myServer;
 	Host myHost;
-	PrintWriter writer;
 	String message;
 	BufferedReader reader;
+	PrintWriter writer;
 	String incomingHost;
 	int incomingPID;
 	public ServerSock(Socket s,TCPServer server, Host h){
@@ -20,7 +20,7 @@ public class ServerSock implements Runnable{
 		incomingPID = myHost.hostMap.get(incomingHost);
 	}
 	public void onReceiveRequest(Message message){
-		
+		sendLock();
 	}
 	public void onReceiveFail(Message message){
 		
@@ -29,18 +29,32 @@ public class ServerSock implements Runnable{
 	public void onReceiveYield(Message message){
 		
 	}
-	public void send(Message message){
-		
+	public void sendLock(){
+		Clock.incrClock();
+		writer.println("LOCK~" + myHost.getMe().getPID() + "~" + Clock.getValue());
+		writer.flush();
 	}
 	public void run(){
+		 try{
+			 System.out.println("Starting server thread @ " + myHost.getMe().getPID());
+		reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+		writer = new PrintWriter(socket.getOutputStream());
 	   	while(true){
-	   	     try{
-	   	    	reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+	   	    
+	   	    	
+	   	    	
 			    message = reader.readLine();
-			    if(message.indexOf("REQUEST") != -1){
-			    	Scanner sc = new Scanner(message);
+			    System.out.println("Got this message: " + message);
+			  
+			    if(message.contains("REQUEST")){
+			    	System.out.println("ulla iruken");
+			    	/*Scanner sc = new Scanner(message);
 			    	sc.next();
-			    	onReceiveRequest(new Message(sc.nextInt(),incomingPID,"REQUEST"));
+			    	int pid = sc.nextInt();
+			    	int incomingClock = sc.nextInt();
+			    	
+			    	onReceiveRequest(new Message(sc.nextInt(),incomingPID,"REQUEST"));*/
+			    	sendLock();
 			    	continue;
 			    }
 			    if(message.indexOf("RELEASE") != -1){
@@ -56,9 +70,10 @@ public class ServerSock implements Runnable{
 			    }
 			    
 	   	     }
+		 }
 	   	     catch(Exception e){
 	   	    	 
 	   	     }
-	   	}
+	   	
 	}
 }

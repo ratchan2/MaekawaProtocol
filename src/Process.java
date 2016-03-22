@@ -16,11 +16,10 @@ public class Process{
 		 Application app = new Application(client);
 		 client.setData(server,h);
 		 server.setData(client,h);
+		 
 	     Thread serverThread = new Thread(server);
-	     Thread clientThread = new Thread(client);
 	     Thread applicationThread = new Thread(app);
 	     serverThread.start();
-	     clientThread.start();
 	     applicationThread.start();
 	 }
 }

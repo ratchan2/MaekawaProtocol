@@ -8,18 +8,29 @@ public class TCPClient implements Runnable{
 	public void setPID(int id){
 		pid = id;
 	}
+	boolean threadForked = false;
+   public boolean hasLockedAll(){
+	   if(connections.size() < myHost.numberOfQuorumMembers){
+		   return false;
+	   }
+	    for(int i = 0; i < connections.size(); i++){
+	    	 if(connections.get(i).isLocked() == false){
+	    		 return false;
+	    	 }
+	    }
+	    return true;
+   }
 	public void onCsEnter(){
-	       for(i = 0; i < myHost.numberOfQuorumMembers; i++){
-	    	   connections.get(i).sendRequest(0 /*request id*/);
-	       }
-	       
-	       while(!lockedAll());
+		if(!threadForked){
+	        Thread t = new Thread(this);
+	        t.start();
+	        
+	        threadForked = true;
+		}
+	       while(!hasLockedAll()); 
 	}
 	
-	
-	public void criticalSection() throws Exception{
-		Thread.sleep(Config.getCsTime());
-	}
+
 	public void setData(TCPServer server,Host h){
 		myServer = server;
 		myHost = h;
@@ -31,12 +42,7 @@ public class TCPClient implements Runnable{
         	connections.add(c);
         	Thread t = new Thread(c);
         	t.start();
-        	try{
-            t.join();
-        	}
-        	catch(Exception e){
-        		
-        	}
+        
         }
 	}
 }

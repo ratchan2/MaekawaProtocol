@@ -33,7 +33,7 @@ public class Config{
 		int hostsCount = 0;
 		int currentHost = 0;
 		HashMap<Integer,Node> hosts = new HashMap<Integer,Node>();
-		HashMap<String,Integer> hostMap = new HashMap<String,Integer>;
+		HashMap<String,Integer> hostMap = new HashMap<String,Integer>();
 		while((line = file.readLine()) != null){
 		
 			if(line.length() == 0 || (line.charAt(0) == '#')){
@@ -57,7 +57,7 @@ public class Config{
 		    	 continue;
 		    }
 		    Host rHost = new Host(me,hosts.get(me));   
-		    rHost.hostMap = hosts;
+		    rHost.hostMap = hostMap;
 		    if(hostsCount == numberOfNodes && currentHost < numberOfNodes){
 		    	if(currentHost == me){ //honor only current node
 		    		while(sc.hasNext()){
