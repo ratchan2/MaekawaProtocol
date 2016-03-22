@@ -21,7 +21,6 @@ public class Application implements Runnable{
 		if(myClient.myHost.getMe().getPID() >= 1){
 			return;
 		}
-		for(int i = 0; i < Config.getNumberOfRequests(); i++){
 		try{
     	  csEnter();
     	  System.out.println("ENDERING GRITIGAL SEGSION " + myClient.myHost.getMe().getPID());
@@ -33,5 +32,5 @@ public class Application implements Runnable{
 			
 		}
     }
-	}
+	
 }

@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.*;
+
+
 public class ClientSock  implements Runnable{
       TCPClient myClient;
       TCPServer myServer;
@@ -12,7 +14,7 @@ public class ClientSock  implements Runnable{
       
      // BufferedReader reader;
       Host myHost;
-      public static boolean hostPing = false;
+      public  boolean hostPing = false;
       boolean receivedFail = false;
       boolean locked = false;
       boolean isConnectionEstablished(){
@@ -51,6 +53,7 @@ public class ClientSock  implements Runnable{
     	  
       }
       public void sendRequest(){
+    	  
     	   System.out.println("SENDING REQUEST to " +  quorumMember.getPID());
     	   Clock.incrClock();
     	   try{
@@ -92,10 +95,16 @@ public class ClientSock  implements Runnable{
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-    	  
+    	  BufferedReader reader = null;
+		try {
+			  reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
     	  while(true){
     		 try {
-    			BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+    			
 				String  message = reader.readLine();
 				System.out.println("Mesage came :- " + message);
 				
