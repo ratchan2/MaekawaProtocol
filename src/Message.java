@@ -1,15 +1,18 @@
+import java.util.Comparator;
+
 public class Message{
-	public int requestID;
 	public int pid;
+	public int clock;
 	public String messageType;
-	public int getRequestID(){
-		return requestID;
-	}
 	public int getPID(){
 		return pid;
 	}
-	public void setRequestId(int id){
-		requestID = id;
+	@Override
+	String toString(){
+		return (messageType + "~" + pid + "~" + clock);
+	}
+	public int getClock(){
+		return clock;
 	}
 	public void setPID(int pid){
 		this.pid = pid;
@@ -20,9 +23,25 @@ public class Message{
 	public void setMessageType(String type){
 		messageType = type;
 	}
-	public Message(int rid,int pid,String type){
-		this.requestID = rid;
+	public Message(int clock,int pid,String type){
+		this.clock = clock;
 		this.pid = pid;
 		this.messageType = type;
 	}
 }
+
+class MessageComparator implements Comparator<Message>
+{
+    @Override
+    public int compare(Message x, Message y)
+    {
+        
+        if (x.getClock() < y.getClock() || (x.getClock() == y.getClock() && x.getPID() < y.getPID()))
+        {
+            return -1;
+        }
+        return 1;
+        
+    }
+}
+

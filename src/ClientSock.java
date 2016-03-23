@@ -67,7 +67,7 @@ public class ClientSock  implements Runnable{
     	  // BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
     	   PrintWriter writer = new PrintWriter(socket.getOutputStream());
 		  // writer.write("REQUEST~"  +"~" + Clock.getValue());
-    	   writer.println("REQUEST~"  +"~" + Clock.getValue());
+    	   writer.println("REQUEST~" +myHost.getMe().getPID() + "~" + Clock.getValue());
     	   writer.flush();
     	   }
     	   catch(Exception e){
@@ -106,15 +106,17 @@ public class ClientSock  implements Runnable{
     		 try {
     			
 				String  message = reader.readLine();
+				String [] tokens = message.split("[~]");
+				Clock.updateClock(Integer.parseInt(tokens[2]));
 				System.out.println("Mesage came :- " + message);
 				
-				if(message.contains("LOCK")){
+				if(tokens[0].equals("LOCK")){
 	    			   onLocked();
 	    		 }
-	    		 if(message.indexOf("INQUIRE") != -1){
+	    		 if(tokens[0].equals("INQUIRE")){
 	    			   onInquire();
 	    		 }
-	    		 if(message.indexOf("FAIL") != -1){
+	    		 if(tokens[0].equals("FAIL")){
 	    			 onFail();
 	    		 }
 	    		 

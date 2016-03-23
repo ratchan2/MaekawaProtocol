@@ -12,6 +12,9 @@ public class ServerSock implements Runnable{
 	PrintWriter writer;
 	String incomingHost;
 	int incomingPID;
+
+
+
 	public ServerSock(Socket s,TCPServer server, Host h){
 		socket = s;
 		myServer = server;
@@ -19,61 +22,111 @@ public class ServerSock implements Runnable{
 		incomingHost = socket.getInetAddress().getHostName().split("[.]")[0];
 		incomingPID = myHost.hostMap.get(incomingHost);
 	}
-	public void onReceiveRequest(Message message){
-		sendLock();
+	public void onReceiveRequest(Message incomingMessage){
+		if(myServer.lockingRequest == null){
+			myServer.lockingRequest = incomingMessage;
+			sendLock(incomingMessage.getPID());
+
+		} 
+		if(myServer.lockingRequest != null && myServer.lockingRequest.getClock() < incomingMessage.getClock()){
+			myServer.waitingQueue.put(incomingMessage);
+			sendFail(incomingMessage.getPID());
+		}
+		if(myServer.lockingRequest != null && myServer.lockingRequest.getClock() >= incomingMessage.getClock()){
+			sendInquire();
+			myServer.waitingQueue.put(incomingMessage);
+
+		}
 	}
-	public void onReceiveFail(Message message){
-		
+	public void onReceiveRelease(Message incomingMessage){
+		if(myServer.waitingQueue.isEmpty()){
+			myServer.lockingRequest = null;
+		}
+		else{
+			try {
+				myServer.lockingRequest = myServer.waitingQueue.take();
+			    
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			sendLock(myServer.lockingRequest.getPID());
+		}
 	}
-	
+
 	public void onReceiveYield(Message message){
-		
+
 	}
-	public void sendLock(){
+	public synchronized void sendLock(int pid){
 		Clock.incrClock();
-		writer.println("LOCK~" + myHost.getMe().getPID() + "~" + Clock.getValue());
-		writer.flush();
+		PrintWriter currentWriter = myServer.mapNodeWriter.get(pid);
+		currentWriter.println("LOCK~" + myHost.getMe().getPID() + "~" + Clock.getValue());
+		currentWriter.flush();
+		myServer.sentLocked = true;
 	}
-	public void run(){
-		 try{
-			 System.out.println("Starting server thread @ " + myHost.getMe().getPID());
-		reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-		writer = new PrintWriter(socket.getOutputStream());
-	   	while(true){
-	   	    
-	   	    	
-	   	    	
-			    message = reader.readLine();
-			    System.out.println("Got this message: " + message);
-			  
-			    if(message.contains("REQUEST")){
-			    	System.out.println("ulla iruken");
-			    	/*Scanner sc = new Scanner(message);
-			    	sc.next();
-			    	int pid = sc.nextInt();
-			    	int incomingClock = sc.nextInt();
-			    	
-			    	onReceiveRequest(new Message(sc.nextInt(),incomingPID,"REQUEST"));*/
-			    	sendLock();
-			    	continue;
-			    }
-			    if(message.indexOf("RELEASE") != -1){
-			    	
-			    	onReceiveFail(new Message(-1, incomingPID,"RELEASE"));
-			    	continue;
-			    }
-			    
-			    if(message.indexOf("YIELD") != -1){
-			   
-			    	onReceiveYield(new Message(-1, incomingPID,"YIELD"));
-			    	continue;
-			    }
-			    
-	   	     }
-		 }
-	   	     catch(Exception e){
-	   	    	 
-	   	     }
-	   	
+	public synchronized boolean shouldSendLock(Message incomingMessage){
+		if(myServer.sentLocked == false && myServer.waitingQueue.isEmpty()){
+			return true;
+		}
+		if(myServer.sentLocked == true && myServer.waitingQueue.peek().getClock() > incomingMessage.getClock()){
+			return true;
+		}
+		return false;
+	}
+	public synchronized void sendFail(int pid){
+		Clock.incrClock();
+		PrintWriter currentWriter = myServer.mapNodeWriter.get(pid);
+		currentWriter.println("FAIL~" + myHost.getMe().getPID() + "~" + Clock.getValue());
+		currentWriter.flush();
+
+	}
+	public synchronized void sendInquire(){
+		Clock.incrClock();
+		PrintWriter currentWriter = myServer.mapNodeWriter.get(pid);
+		currentWriter.println("INQUIRE~" + myHost.getMe().getPID() + "~" + Clock.getValue());
+		currentWriter.flush();
+	}
+
+	public synchronized void run(){
+		try{
+			System.out.println("Starting server thread @ " + myHost.getMe().getPID());
+			reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			writer = new PrintWriter(socket.getOutputStream());
+			myServer.mapNodeWriter.put(incomingPID, writer);
+			while(true){
+
+
+
+				message = reader.readLine();
+				String []tokens = message.split("[~]");
+				Clock.updateClock(Integer.parseInt(tokens[2]));
+				Message incomingMessage  = new Message(Integer.parseInt(tokens[2]),Integer.parseInt(tokens[1]),tokens[0]);
+				System.out.println("Got this message: " + message);
+
+
+				if(message.contains("REQUEST")){
+
+					onReceiveRequest(incomingMessage);
+					continue;
+
+				}
+				if(message.contains("RELEASE")){
+
+					onReceiveRelease(incomingMessage);
+					continue;
+				}
+
+				if(message.indexOf("YIELD") != -1){
+
+					onReceiveYield(new Message(-1, incomingPID,"YIELD"));
+					continue;
+				}
+
+			}
+		}
+		catch(Exception e){
+
+		}
+
 	}
 }

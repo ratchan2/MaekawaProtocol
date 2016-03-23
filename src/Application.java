@@ -18,9 +18,7 @@ public class Application implements Runnable{
     	Thread.sleep(Config.getCsTime());
     }
 	public void run(){
-		if(myClient.myHost.getMe().getPID() >= 1){
-			return;
-		}
+	
 		try{
     	  csEnter();
     	  System.out.println("ENDERING GRITIGAL SEGSION " + myClient.myHost.getMe().getPID());
