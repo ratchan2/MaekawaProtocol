@@ -22,7 +22,8 @@ public class ServerSock implements Runnable{
 		incomingHost = socket.getInetAddress().getHostName().split("[.]")[0];
 		incomingPID = myHost.hostMap.get(incomingHost);
 	}
-	public void onReceiveRequest(Message incomingMessage){
+	public synchronized void onReceiveRequest(Message incomingMessage){
+		Logger.log(myHost,"Got request from " + incomingMessage.getPID());
 		if(myServer.lockingRequest == null){
 			myServer.lockingRequest = incomingMessage;
 			sendLock(incomingMessage.getPID());
@@ -32,18 +33,29 @@ public class ServerSock implements Runnable{
 			myServer.waitingQueue.put(incomingMessage);
 			sendFail(incomingMessage.getPID());
 		}
-		if(myServer.lockingRequest != null && myServer.lockingRequest.getClock() >= incomingMessage.getClock()){
+		if(myServer.lockingRequest != null && myServer.lockingRequest.getClock() >= incomingMessage.getClock() && myServer.lockingRequest.getPID() > incomingMessage.getPID()){
 			sendInquire(myServer.lockingRequest.getPID());
 			myServer.waitingQueue.put(incomingMessage);
 
 		}
 	}
-	public void onReceiveRelease(Message incomingMessage){
+	public synchronized void onReceiveRelease(Message incomingMessage){
+		Logger.log(myHost,"Got release from " + incomingMessage.getPID());
 		if(myServer.waitingQueue.isEmpty()){
 			myServer.lockingRequest = null;
 		}
+		
+	        
+		
 		else{
+			 String line = "My Wait Queue:- ";
+			 Iterator<Message> through = myServer.waitingQueue.iterator() ;
+		        while(through.hasNext() ) {
+		                  line += through.next() + " " ;
+		                }
+			Logger.log(myHost, line);
 			try {
+			
 				myServer.lockingRequest = myServer.waitingQueue.take();
 			    
 			} catch (InterruptedException e) {
@@ -54,7 +66,8 @@ public class ServerSock implements Runnable{
 		}
 	}
 
-	public void onReceiveYield(Message message){
+	public synchronized void onReceiveYield(Message incomingMessage){
+		Logger.log(myHost,"Got yield from " + incomingMessage.getPID());
            if(!myServer.waitingQueue.isEmpty()){
         	   try{
         	   myServer.waitingQueue.put(myServer.lockingRequest);	   
@@ -70,6 +83,7 @@ public class ServerSock implements Runnable{
            }
 	}
 	public synchronized void sendLock(int pid){
+		Logger.log(myHost,"Sending lock to " + pid);
 		Clock.incrClock();
 		PrintWriter currentWriter = myServer.mapNodeWriter.get(pid);
 		currentWriter.println("LOCK~" + myHost.getMe().getPID() + "~" + Clock.getValue());
@@ -78,6 +92,7 @@ public class ServerSock implements Runnable{
 	}
 	
 	public synchronized void sendFail(int pid){
+		Logger.log(myHost,"Sending fail to " + pid);
 		Clock.incrClock();
 		PrintWriter currentWriter = myServer.mapNodeWriter.get(pid);
 		currentWriter.println("FAIL~" + myHost.getMe().getPID() + "~" + Clock.getValue());
@@ -85,6 +100,7 @@ public class ServerSock implements Runnable{
 
 	}
 	public synchronized void sendInquire(int pid){
+		Logger.log(myHost,"Sending inquire to " + pid);
 		Clock.incrClock();
 		PrintWriter currentWriter = myServer.mapNodeWriter.get(pid);
 		currentWriter.println("INQUIRE~" + myHost.getMe().getPID() + "~" + Clock.getValue());
@@ -93,7 +109,7 @@ public class ServerSock implements Runnable{
 
 	public synchronized void run(){
 		try{
-			System.out.println("Starting server thread @ " + myHost.getMe().getPID());
+			Logger.log(myHost, "Starting server thread @ " + myHost.getMe().getPID());
 			reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			writer = new PrintWriter(socket.getOutputStream());
 			myServer.mapNodeWriter.put(incomingPID, writer);
@@ -105,8 +121,7 @@ public class ServerSock implements Runnable{
 				String []tokens = message.split("[~]");
 				Clock.updateClock(Integer.parseInt(tokens[2]));
 				Message incomingMessage  = new Message(Integer.parseInt(tokens[2]),Integer.parseInt(tokens[1]),tokens[0]);
-				System.out.println("Got this message: " + message);
-
+				
 
 				if(message.contains("REQUEST")){
 

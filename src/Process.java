@@ -16,7 +16,7 @@ public class Process{
 		 Application app = new Application(client);
 		 client.setData(server,h);
 		 server.setData(client,h);
-		 
+		 Logger.logsOff = true;
 	     Thread serverThread = new Thread(server);
 	     Thread applicationThread = new Thread(app);
 	     serverThread.start();

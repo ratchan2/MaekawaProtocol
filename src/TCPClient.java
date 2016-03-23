@@ -35,10 +35,7 @@ public class TCPClient implements Runnable{
 
 		if(!threadForked){
 			Thread t = new Thread(this);
-			System.out.println("Atleast I reached here");
 			t.start();
-			System.out.println("Requesting for criticle section");
-
 			threadForked = true;
 		}
 		while(!hasLockedAll());
@@ -59,7 +56,5 @@ public class TCPClient implements Runnable{
 			t.start();
 
 		}
-
-		System.out.println("#Connections : " + connections.size() + " #QuorumNum : " + myHost.numberOfQuorumMembers);
 	}
 }
