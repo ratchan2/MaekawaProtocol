@@ -8,6 +8,7 @@ public class Message{
 		return pid;
 	}
 	@Override
+	public
 	String toString(){
 		return (messageType + "~" + pid + "~" + clock);
 	}
@@ -30,18 +31,6 @@ public class Message{
 	}
 }
 
-class MessageComparator implements Comparator<Message>
-{
-    @Override
-    public int compare(Message x, Message y)
-    {
-        
-        if (x.getClock() < y.getClock() || (x.getClock() == y.getClock() && x.getPID() < y.getPID()))
-        {
-            return -1;
-        }
-        return 1;
-        
-    }
+
 }
 

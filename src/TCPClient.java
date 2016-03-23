@@ -10,6 +10,7 @@ public class TCPClient implements Runnable{
 	}
 	boolean threadForked = false;
 	//condition to check the
+	public static boolean inCS = false;
 	public synchronized boolean hasLockedAll(){
 		if(connections.size() < myHost.numberOfQuorumMembers){
 			return false;
@@ -21,8 +22,16 @@ public class TCPClient implements Runnable{
 		}
 		return true;
 	}
-	
-	public void onCsEnter(){
+	public synchronized boolean hasReceivedFail(){
+		for(int i = 0; i < connections.size(); i++){
+			if(connections.get(i).receivedFail){
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public synchronized void onCsEnter(){
 
 		if(!threadForked){
 			Thread t = new Thread(this);
@@ -32,7 +41,8 @@ public class TCPClient implements Runnable{
 
 			threadForked = true;
 		}
-		while(!hasLockedAll()); 
+		while(!hasLockedAll());
+        inCS = true;
 	}
 
 

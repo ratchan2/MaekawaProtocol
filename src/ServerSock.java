@@ -33,7 +33,7 @@ public class ServerSock implements Runnable{
 			sendFail(incomingMessage.getPID());
 		}
 		if(myServer.lockingRequest != null && myServer.lockingRequest.getClock() >= incomingMessage.getClock()){
-			sendInquire();
+			sendInquire(myServer.lockingRequest.getPID());
 			myServer.waitingQueue.put(incomingMessage);
 
 		}
@@ -55,7 +55,19 @@ public class ServerSock implements Runnable{
 	}
 
 	public void onReceiveYield(Message message){
-
+           if(!myServer.waitingQueue.isEmpty()){
+        	   try{
+        	   myServer.waitingQueue.put(myServer.lockingRequest);	   
+        	   myServer.lockingRequest = myServer.waitingQueue.take();
+        	   sendLock(myServer.lockingRequest.getPID());
+        	   }
+        	   catch(Exception e){
+        		   
+        	   }
+           }
+           else{
+        	   myServer.lockingRequest = null;
+           }
 	}
 	public synchronized void sendLock(int pid){
 		Clock.incrClock();
@@ -64,15 +76,7 @@ public class ServerSock implements Runnable{
 		currentWriter.flush();
 		myServer.sentLocked = true;
 	}
-	public synchronized boolean shouldSendLock(Message incomingMessage){
-		if(myServer.sentLocked == false && myServer.waitingQueue.isEmpty()){
-			return true;
-		}
-		if(myServer.sentLocked == true && myServer.waitingQueue.peek().getClock() > incomingMessage.getClock()){
-			return true;
-		}
-		return false;
-	}
+	
 	public synchronized void sendFail(int pid){
 		Clock.incrClock();
 		PrintWriter currentWriter = myServer.mapNodeWriter.get(pid);
@@ -80,7 +84,7 @@ public class ServerSock implements Runnable{
 		currentWriter.flush();
 
 	}
-	public synchronized void sendInquire(){
+	public synchronized void sendInquire(int pid){
 		Clock.incrClock();
 		PrintWriter currentWriter = myServer.mapNodeWriter.get(pid);
 		currentWriter.println("INQUIRE~" + myHost.getMe().getPID() + "~" + Clock.getValue());
