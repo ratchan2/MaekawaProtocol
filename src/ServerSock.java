@@ -45,8 +45,6 @@ public class ServerSock implements Runnable{
 			myServer.lockingRequest = null;
 		}
 		
-	        
-		
 		else{
 			 String line = "My Wait Queue:- ";
 			 Iterator<Message> through = myServer.waitingQueue.iterator() ;
@@ -82,7 +80,7 @@ public class ServerSock implements Runnable{
         	   myServer.lockingRequest = null;
            }
 	}
-	public synchronized void sendLock(int pid){
+	public  void sendLock(int pid){
 		Logger.log(myHost,"Sending lock to " + pid);
 		Clock.incrClock();
 		PrintWriter currentWriter = myServer.mapNodeWriter.get(pid);
@@ -91,7 +89,7 @@ public class ServerSock implements Runnable{
 		myServer.sentLocked = true;
 	}
 	
-	public synchronized void sendFail(int pid){
+	public  void sendFail(int pid){
 		Logger.log(myHost,"Sending fail to " + pid);
 		Clock.incrClock();
 		PrintWriter currentWriter = myServer.mapNodeWriter.get(pid);
@@ -99,7 +97,7 @@ public class ServerSock implements Runnable{
 		currentWriter.flush();
 
 	}
-	public synchronized void sendInquire(int pid){
+	public  void sendInquire(int pid){
 		Logger.log(myHost,"Sending inquire to " + pid);
 		Clock.incrClock();
 		PrintWriter currentWriter = myServer.mapNodeWriter.get(pid);
@@ -107,7 +105,7 @@ public class ServerSock implements Runnable{
 		currentWriter.flush();
 	}
 
-	public synchronized void run(){
+	public void run(){
 		try{
 			Logger.log(myHost, "Starting server thread @ " + myHost.getMe().getPID());
 			reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));

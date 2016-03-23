@@ -22,7 +22,7 @@ public class ClientSock  implements Runnable{
       boolean isConnectionEstablished(){
     	  return hostPing;
       }
-      public synchronized void onFail(Message incomingMessage){
+      public  void onFail(Message incomingMessage){
     	  //I have received a fail message
     	  receivedFail = true;
       }
@@ -32,7 +32,7 @@ public class ClientSock  implements Runnable{
     	     }
       }
       
-      public synchronized void onLocked(Message incomingMessage){
+      public void onLocked(Message incomingMessage){
     	  locked = true;
     	  Logger.log(myHost,"Received lock from  " + quorumMember.getPID());
 
@@ -53,7 +53,7 @@ public class ClientSock  implements Runnable{
     	  writer.println("YIELD~" +myHost.getMe().getPID() + "~" + Clock.getValue());
     	  writer.flush();
       }
-      public  void sendRequest(){
+      public void sendRequest(){
     	  
     	   Logger.log(myHost,"Sending request to " +  quorumMember.getPID());
     	   Clock.incrClock();

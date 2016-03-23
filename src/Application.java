@@ -22,18 +22,21 @@ public class Application implements Runnable{
     	Thread.sleep(Config.getCsTime());
     }
 	public void run(){
-	
+		for(int i = 0; i < Config.getNumberOfRequests(); i++){
+	    	          	
 		try{
-		  
-    	  csEnter();
+	     		
+		  csEnter();
     	  System.out.println("ENDERING GRITIGAL SEGSION " + myClient.myHost.getMe().getPID());
     	  criticalSection();
     	  System.out.println("LEABING GRITIGAL SEGSION " + myClient.myHost.getMe().getPID());
           csExit();
+          Thread.sleep(Config.getRequestDelay());
           
 		}
 		catch(Exception e){
 			
+		}
 		}
     }
 	
