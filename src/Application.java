@@ -1,43 +1,53 @@
 
 public class Application implements Runnable{
 	TCPClient myClient;
+	public Host myHost;
 	public Application(TCPClient c){
 		myClient = c;
 	}
-    public void csEnter() throws Exception{
-        myClient.onCsEnter();
-       
-    }  
-    public synchronized void csExit(){
-    	 //remove all locks and send RELEASE MESSAGES
-    	for(int i = 0; i < myClient.connections.size(); i++){
-    		myClient.connections.get(i).locked = false;
-    		myClient.connections.get(i).sendRelease();
-            myClient.connections.get(i).receivedFail = false;
-    	}
-    	myClient.inCS = false;
-    }
-    public void criticalSection() throws Exception{
-    	
-    	Thread.sleep(Config.getCsTime());
-    }
+	
+	public void csEnter() throws Exception{
+		myClient.onCsEnter();
+
+	}  
+	public void setData(Host h){
+		myHost = h;
+	}
+	public void csExit(){
+		//remove all locks and send RELEASE MESSAGES
+		synchronized(Process.cs){
+			for(int i = 0; i < myClient.connections.size(); i++){
+				Process.cs.locks.put(myClient.connections.get(i).quorumMember.getPID(),false);
+				Process.cs.fails.put(myClient.connections.get(i).quorumMember.getPID(),false);
+
+			}
+			Process.cs.inCS = false;
+		}
+		for(int i = 0; i < myClient.connections.size(); i++){
+			myClient.connections.get(i).sendRelease();
+		}
+	}
+	public void criticalSection() throws Exception{
+
+		Thread.sleep(Config.getCsTime());
+	}
 	public void run(){
 		for(int i = 0; i < Config.getNumberOfRequests(); i++){
-	    	          	
-		try{
-	     		
-		  csEnter();
-    	  System.out.println("ENDERING GRITIGAL SEGSION " + myClient.myHost.getMe().getPID());
-    	  criticalSection();
-    	  System.out.println("LEABING GRITIGAL SEGSION " + myClient.myHost.getMe().getPID());
-          csExit();
-          Thread.sleep(Config.getRequestDelay());
-          
+
+			try{
+
+				csEnter();
+				Logger.log(myHost,"ENDERING GRITIGAL SEGSION " + myClient.myHost.getMe().getPID());
+				criticalSection();
+				Logger.log(myHost,"LEABING GRITIGAL SEGSION " + myClient.myHost.getMe().getPID());
+				csExit();
+				Thread.sleep(Config.getRequestDelay());
+
+			}
+			catch(Exception e){
+
+			}
 		}
-		catch(Exception e){
-			
-		}
-		}
-    }
-	
+	}
+
 }

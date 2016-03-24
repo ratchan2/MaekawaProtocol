@@ -14,9 +14,8 @@ public class TCPServer implements Runnable{
 	public Host myHost;
 	//CopyOnWriteArrayList<Message> waitingQueue = new CopyOnWriteArrayList<Message>();
 	
-	Map<Integer, PrintWriter> mapNodeWriter = new HashMap<Integer,PrintWriter>();
+	public  Map<Integer, PrintWriter> mapNodeWriter = new HashMap<Integer,PrintWriter>();
 	
-	PriorityBlockingQueue<Message> waitingQueue = new PriorityBlockingQueue<Message>(1000,new MessageComparator());
 	public int lockedTo;
 	
     public TCPServer() {
@@ -28,7 +27,6 @@ public class TCPServer implements Runnable{
 	}
 	//TODO:Check synchronized on sentLocked and lockedPID
 	public static boolean sentLocked = false;
-	public static Message lockingRequest = null;
 	public void run(){
 		try
 		{
