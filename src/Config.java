@@ -65,10 +65,6 @@ public class Config{
 			    	    	rHost.addQuorumMember(currentPID, hosts.get(currentPID));
 			    	}
 		    		
-		    		//I be in my own quorum.
-		    		rHost.addQuorumMember(me,hosts.get(me));
-		    		
-		    		
 		    		file.close();
 		    		return rHost;
 		    		

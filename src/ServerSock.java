@@ -1,4 +1,5 @@
 import java.io.BufferedReader;
+import java.util.concurrent.*;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.*;
@@ -19,38 +20,62 @@ public class ServerSock implements Runnable{
 		incomingHost = socket.getInetAddress().getHostName().split("[.]")[0];
 		incomingPID = myHost.hostMap.get(incomingHost);
 	}
+	
+	public void printMyQueue(){
+		
+		Logger.log(myHost, "My locking request:- " + Process.ss.lockingRequest.toString());
+		String line = "My Wait Queue:- ";
+		 Iterator<Message> through = Process.ss.waitingQueue.iterator() ;
+	        while(through.hasNext() ) {
+	                  line += through.next() + " " ;
+	                }
+		Logger.log(myHost, line);
+
+	}
 	public void onReceiveRequest(Message incomingMessage){
 		boolean lock = false;
 		boolean fail = false;
 		boolean inquire = false;
 		Logger.log(myHost,"Got request from " + incomingMessage.getPID());
 		synchronized(Process.ss){
+			Logger.log(myHost, "Entered  request synchronized block");
 			if(Process.ss.lockingRequest == null){
 				Process.ss.lockingRequest = incomingMessage;
 				lock = true;
-
+				
+				incomingMessage = null;
+				
 			} 
-			if(Process.ss.lockingRequest != null && Process.ss.lockingRequest.getClock() < incomingMessage.getClock()){
+			
+			if((Process.ss.lockingRequest != null && incomingMessage != null && Process.ss.lockingRequest.getClock() < incomingMessage.getClock())
+				|| (Process.ss.lockingRequest != null && incomingMessage != null && Process.ss.lockingRequest.getClock() == incomingMessage.getClock() && Process.ss.lockingRequest.getPID() < incomingMessage.getPID())){
 				Process.ss.waitingQueue.add(incomingMessage);
 				fail = true;
-
+				incomingMessage = null;
+				
+				
+				
 			}
-			if(Process.ss.lockingRequest != null && Process.ss.lockingRequest.getClock() >= incomingMessage.getClock() && Process.ss.lockingRequest.getPID() > incomingMessage.getPID()){
+			if(Process.ss.lockingRequest != null && incomingMessage != null && Process.ss.lockingRequest.getClock() >= incomingMessage.getClock() && Process.ss.lockingRequest.getPID() > incomingMessage.getPID()){
 				inquire = true;
 				Process.ss.waitingQueue.add(incomingMessage);
+					
 
 			}
+			Process.ss.notifyAll();
 		}
-		Logger.log(myHost,"INGA VANDACHEYY!!");
+		
 		if(lock){
 			sendLock(incomingMessage.getPID());
 			return;
 		}
 		if(fail){
+			
 			sendFail(incomingMessage.getPID());
 			return;
 		}
 		if(inquire){
+			
 			sendInquire(Process.ss.lockingRequest.getPID());
 			return;
 		}
@@ -59,28 +84,25 @@ public class ServerSock implements Runnable{
 		Logger.log(myHost,"Got release from " + incomingMessage.getPID());
 		boolean lock = false;
 		synchronized(Process.ss){
+			Logger.log(myHost, "Entered  receive ` block");
 			if(Process.ss.waitingQueue.isEmpty()){
 				Process.ss.lockingRequest = null;
 			}
 
 			else{
-				String line = "My Wait Queue:- ";
-				//			 Iterator<Message> through = Process.ss.waitingQueue.iterator() ;
-				//		        while(through.hasNext() ) {
-				//		                  line += through.next() + " " ;
-				//		                }
-				//			Logger.log(myHost, line);
-
+				
 				lock = true;
 				Process.ss.lockingRequest = Process.ss.waitingQueue.remove();
 
 
-
 			}
+			Process.ss.notifyAll();
 		}
+		printMyQueue();
 
 		if(lock){
 			sendLock(Process.ss.lockingRequest.getPID());
+
 		}
 
 	}
@@ -88,19 +110,24 @@ public class ServerSock implements Runnable{
 	public void onReceiveYield(Message incomingMessage){
 		Logger.log(myHost,"Got yield from " + incomingMessage.getPID());
 		boolean lock = false;
+	
 		synchronized(Process.ss){  
+			Logger.log(myHost, "Entered yield synchronized block");
 			if(!Process.ss.waitingQueue.isEmpty()){
-				Process.ss.waitingQueue.add(Process.ss.lockingRequest);	   
+				Process.ss.waitingQueue.add(Process.ss.lockingRequest);	
 				Process.ss.lockingRequest = Process.ss.waitingQueue.remove();
-				lock = true;
-			}
+				}
 			else{
 				Process.ss.lockingRequest = null;
 			}
+			
 		}
+		
 		if(lock){
 			sendLock(Process.ss.lockingRequest.getPID());
+			
 		}
+		
 	}
 	public void sendLock(int pid){
 		Logger.log(myHost,"Sending lock to " + pid);
@@ -134,7 +161,6 @@ public class ServerSock implements Runnable{
 
 	public  void run(){
 		try{
-			Logger.log(myHost, "Starting server thread @ " + myHost.getMe().getPID());
 			reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			writer = new PrintWriter(socket.getOutputStream());
 			myServer.mapNodeWriter.put(incomingPID, writer);
@@ -151,18 +177,21 @@ public class ServerSock implements Runnable{
 				if(message.contains("REQUEST")){
 
 					onReceiveRequest(incomingMessage);
+					printMyQueue();
 					continue;
 
 				}
 				if(message.contains("RELEASE")){
 
 					onReceiveRelease(incomingMessage);
+					printMyQueue();
 					continue;
 				}
 
 				if(message.indexOf("YIELD") != -1){
 
 					onReceiveYield(new Message(-1, incomingPID,"YIELD"));
+					printMyQueue();
 					continue;
 				}
 

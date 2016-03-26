@@ -4,46 +4,64 @@ public class TCPClient implements Runnable{
 	private int pid;
 	public TCPServer myServer;
 	public Host myHost;
-	public ArrayList<ClientSock> connections = new ArrayList<ClientSock>();
+	public ArrayList<HostPing> connections = new ArrayList<HostPing>();
+	public ArrayList<ClientRequestV2> clientRequests = new ArrayList<ClientRequestV2>();
 	public void setPID(int id){
 		pid = id;
 	}
 
-	
-
-	public synchronized boolean hasLockedAll(){
-		if(connections.size() < myHost.numberOfQuorumMembers){
+	public boolean threadForked = false;
+	public static int lockingCount = 0;
+	public static int quorumSize = Process.cs.quorumSize;
+    public TCPClient(Host h, TCPServer s){
+    	ClientRequestV2 consumer = new ClientRequestV2(this,myServer,null,myHost,"CONSUMER");
+    	Thread consumerThread = new Thread(consumer);
+    	consumerThread.start();
+    	myHost = h;
+    	myServer = s;
+    	for(int i = 0; i < myHost.quorumList.size(); i++){
+    		clientRequests.add(new ClientRequestV2(this,myServer,myHost.quorumByID(myHost.quorumList.get(i)),myHost,"PRODUCER"));
+    	}
+    }
+	public synchronized static boolean hasLockedAll(){
+		if(lockingCount < quorumSize){
 			return false;
-		}
-		for(int i = 0; i < connections.size(); i++){
-			if(Process.cs.locks.get(connections.get(i).quorumMember.getPID()) == false){
-				return false;
-			}
 		}
 		return true;
 	}
-	public synchronized boolean hasReceivedFail(){
-		for(int i = 0; i < connections.size(); i++){
-			if(Process.cs.fails.get(connections.get(i).quorumMember.getPID())){
-				return true;
-			}
-		}
-		return false;
+	public  boolean hasReceivedFail(){
+//		for(int i = 0; i < connections.size(); i++){
+//			if(Process.cs.fails.get(connections.get(i).quorumMember.getPID())){
+//				return true;
+//			}
+//		}
+//		return false;
+		return Process.cs.receivedFail;
 	}
 
-	public synchronized void onCsEnter(){
-
-		for(int i = 0; i < myHost.numberOfQuorumMembers; i++ ){
-		
-			Process.cs.locks.put(myHost.quorumList.get(i),false);
-			Process.cs.fails.put(myHost.quorumList.get(i),false);
-			Thread t = new Thread(connections.get(i));
+	public void onCsEnter(){
+		Clock.incrClock();
+		Process.sendingClock = Clock.getValue();
+      for(int i = 0; i < myHost.numberOfQuorumMembers; i++ ){
+//    	  Process.cs.locks.put(myHost.quorumList.get(i),false);
+//		  Process.cs.fails.put(myHost.quorumList.get(i),false);
+		  
+    	  if(!threadForked){
+    		Thread t = new Thread(clientRequests.get(i));
 			t.start();
-
+            
 		}
-		
-		while(!hasLockedAll());
+    	  else{
+    		   int quorumPID = clientRequests.get(i).quorumMember.getPID();
+    		   ClientRequestV2.sendRequest(quorumPID);
+    	  }
+       }
+      threadForked = true;
+        
+      while(!hasLockedAll());
+        synchronized(Process.cs){
 		Process.cs.inCS = true;
+		}
 	}
 
 
@@ -52,19 +70,14 @@ public class TCPClient implements Runnable{
 		myHost = h;
 	}
 	public void run(){
-		String line = "My Quorum members:- ";
-		for(int i = 0; i < myHost.quorumList.size(); i++){
-			line += myHost.quorumList.get(i) + " ";
-		}
-		Logger.log(myHost, line);
-		for(int i = 0; i < myHost.numberOfQuorumMembers; i++ ){
-			ClientSock c = new ClientSock(this,myServer,myHost.quorumByID(myHost.quorumList.get(i)),myHost);
-			Process.cs.locks.put(myHost.quorumList.get(i),false);
-			Process.cs.fails.put(myHost.quorumList.get(i),false);
-			connections.add(c);
-			Thread t = new Thread(c);
-			t.start();
-
-		}
+//		for(int i = 0; i < myHost.numberOfQuorumMembers; i++ ){
+//			HostPing h = new HostPing(this,myServer,myHost.quorumByID(myHost.quorumList.get(i)),myHost,clientRequests.get(i));
+//			Process.cs.locks.put(myHost.quorumList.get(i),false);
+//			Process.cs.fails.put(myHost.quorumList.get(i),false);
+//			connections.add(h);
+//			Thread t = new Thread(h);
+//			t.start();
+//
+//		}
 	}
 }

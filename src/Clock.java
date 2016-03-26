@@ -1,23 +1,21 @@
 
 public class Clock {
-      public Integer value = 0;
-       public void incrClock(){
-    	   synchronized(this.value){
+      public static Integer value = 0;
+       public  static void incrClock(){
     	      value++;
-    	   }
+    	   
       }
-      public int getValue(){
+      public static int getValue(){
     	  return value;
       }
-	 public void updateClock(int value) {
-		 synchronized(this.value){
-		  if(this.value < value){
-			  this.value = value + 1;
+	 public static void updateClock(int value) {
+		  if(Clock.value < value){
+			  Clock.value = value + 1;
 		  }
 		  else{
-			  this.value = this.value + 1;
+			  Clock.value = Clock.value + 1;
 		  }
-		 }
+		 
 	}
       
       

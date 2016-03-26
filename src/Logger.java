@@ -8,13 +8,13 @@ public class Logger{
 		if(!logsOff){
 			System.out.println(h.getMe().getPID() + ">" + line);
 		}
-		else{
-			try{
-				Files.write(Paths.get("foo.out"), (h.getMe().getPID() + ">" + line + "\n").getBytes(), StandardOpenOption.APPEND);
-			}
-			catch(Exception e){
-
-			}
-		}
+//		else{
+//			try{
+//				Files.write(Paths.get("foo.out"), (h.getMe().getPID() + ">" + line + "\n").getBytes(), StandardOpenOption.APPEND);
+//			}
+//			catch(Exception e){
+//
+//			}
+//		}
 	}
 }

@@ -15,22 +15,27 @@ class ClientState{
 	public HashMap<Integer,Boolean> locks = new HashMap<Integer,Boolean>();
 	public HashMap<Integer,Boolean> fails = new HashMap<Integer,Boolean>();
 	public boolean inCS = false;
+	public static Integer lockingCount = 0;
+	 public static int quorumSize = 0;
+	 public static boolean receivedFail = false;
 }
 public class Process{
 	 
 	 public static ServerState ss = new ServerState();
 	 public static ClientState cs = new ClientState();
-	 public static Clock clock = new Clock();
+	 public static int sendingClock = 0;
+	 
 	 public static void main(String args[]) throws Exception{
 		 Config.setMe(Integer.parseInt(args[1]));
 		 Host h = Config.readFile(args[0]);
-		 TCPClient client = new TCPClient();
+		 Process.cs.quorumSize = h.quorumList.size();
 		 TCPServer server = new TCPServer();
+		 TCPClient client = new TCPClient(h,server);
 		 Application app = new Application(client);
 		 client.setData(server,h);
 		 server.setData(client,h);
 		 app.setData(h);
-		 Logger.logsOff = false;
+		 Logger.logsOff = true;
 	     Thread serverThread = new Thread(server);
 	     Thread clientThread = new Thread(client);
 	     Thread applicationThread = new Thread(app);

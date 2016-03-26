@@ -9,32 +9,22 @@ import java.util.concurrent.*;
 
 
 public class TCPServer implements Runnable{
-	public int pid;
 	public TCPClient myClient;
 	public Host myHost;
-	//CopyOnWriteArrayList<Message> waitingQueue = new CopyOnWriteArrayList<Message>();
 	
-	public  Map<Integer, PrintWriter> mapNodeWriter = new HashMap<Integer,PrintWriter>();
-	
-	public int lockedTo;
-	
-    public TCPServer() {
-		
-	}
-	
-	public void setPID(int id){
-		pid = id;
-	}
-	//TODO:Check synchronized on sentLocked and lockedPID
-	public static boolean sentLocked = false;
 	public void run(){
 		try
 		{
 			ServerSocket serverSock = new ServerSocket(myHost.getMe().getPort());
+			ServerSockV2 consumer = new ServerSockV2(null,this,myHost);
+			consumer.setRole("CONSUMER");
+			Thread consumerThread = new Thread(consumer);
+			consumerThread.start();
 			while(true){
 			
 				Socket sock = serverSock.accept();
-			 	ServerSock currentSock = new ServerSock(sock,this,myHost);
+			 	ServerSockV2 currentSock = new ServerSockV2(sock,this,myHost);
+			 	currentSock.setRole("PRODUCER");
 				Thread t = new Thread(currentSock);
 			    t.start();
 			    	
