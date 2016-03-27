@@ -20,16 +20,8 @@ public class Application implements Runnable{
 //				Process.cs.locks.put(myClient.connections.get(i).quorumMember.getPID(),false);
 //				Process.cs.fails.put(myClient.connections.get(i).quorumMember.getPID(),false);
 //           }
-			Process.cs.inCS = false;
-		    ClientRequest.receivedFail = false;
-			ClientRequest.lockingCount = 0;
-			TCPClient.lockingCount = 0;
-			ClientRequestV2.locks.clear();
-		for(int i = 0; i < myClient.clientRequests.size(); i++){
-			   int quorumPID = myClient.clientRequests.get(i).quorumMember.getPID();
-			    ClientRequestV2.sendRelease(quorumPID);
-		}
-		Logger.log(myHost, "Sent Release message");
+		ClientRequestV2.onCsExit();
+			
      
 	}
 	public void criticalSection() throws Exception{

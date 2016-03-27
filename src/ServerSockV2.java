@@ -14,7 +14,7 @@ public class ServerSockV2 implements Runnable{
 	String incomingHost;
 	int incomingPID;
 	public static LinkedBlockingQueue<Message> messageQueue = new LinkedBlockingQueue<Message> ();
-	public static PriorityQueue<Message> waitingQueue = new PriorityQueue<Message>(1000, new MessageComparator());
+	public static PriorityQueue<Message> waitingQueue = new PriorityQueue<Message>(Config.getNumberOfNodes()*Config.getNumberOfRequests(), new MessageComparator());
 	public static Map<Integer, PrintWriter> mapNodeWriter = new HashMap<Integer,PrintWriter>();
 	public static Message lockingRequest = null;
 	public static boolean haveInquired = false;

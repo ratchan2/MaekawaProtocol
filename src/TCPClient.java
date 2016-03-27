@@ -59,9 +59,9 @@ public class TCPClient implements Runnable{
       threadForked = true;
         
       while(!hasLockedAll());
-        synchronized(Process.cs){
-		Process.cs.inCS = true;
-		}
+      
+      ClientRequestV2.setInCS(true);
+        
 	}
 
 

@@ -19,8 +19,13 @@ public class ClientRequestV2 implements Runnable{
 	BufferedReader reader = null;
 	boolean locked = false;
 	public boolean signal = false;
+	public static boolean inCS = false;
+	public static HashMap<Integer,Boolean> whoInquired = new HashMap<Integer,Boolean>();
 	boolean isConnectionEstablished(){
 		return hostPing;
+	}
+	public synchronized static void setInCS(boolean value){
+		 inCS = value;
 	}
 	String role;
 	public static HashMap<Integer,Boolean> locks = new HashMap<Integer,Boolean>();
@@ -38,7 +43,30 @@ public class ClientRequestV2 implements Runnable{
 //			Process.cs.fails.put(quorumMember.getPID(), true);
 //		}
 		receivedFail = true;
+	    
+		if(!inCS && !whoInquired.isEmpty()){
+			//send yield to all those quorum members who sent you inquired
+			for(Integer i:whoInquired.keySet() ){
+				sendYield(i.intValue());
+				
+				}
+			whoInquired.clear();
+		}
 
+	}
+	public synchronized static void onCsExit(){
+		Process.cs.inCS = false;
+	    ClientRequest.receivedFail = false;
+//		ClientRequest.lockingCount = 0;
+//		TCPClient.lockingCount = 0;
+		ClientRequestV2.locks.clear();
+		ClientRequestV2.setInCS(false);
+		whoInquired.clear();
+	for(int i = 0; i < myClient.clientRequests.size(); i++){
+		   int quorumPID = myClient.clientRequests.get(i).quorumMember.getPID();
+		    ClientRequestV2.sendRelease(quorumPID);
+	}
+	Logger.log(myHost, "Sent Release message");
 	}
 	public synchronized static boolean hasFailed(){
 		return receivedFail;
@@ -52,12 +80,16 @@ public class ClientRequestV2 implements Runnable{
 //				}
 //			}
 //		}
-		if(Process.cs.inCS){
+		if(inCS){
 			return false;
 		}
 		if(hasFailed()){
 		lockingCount--;
 		myClient.lockingCount = lockingCount;
+		}
+		else{
+			//we are not in cs but not failed, so we keep track.
+			whoInquired.put(incomingMessage.getPID(), true);
 		}
 		return receivedFail;
 	}
