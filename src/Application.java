@@ -24,7 +24,7 @@ public class Application implements Runnable{
 		    ClientRequest.receivedFail = false;
 			ClientRequest.lockingCount = 0;
 			TCPClient.lockingCount = 0;
-
+			ClientRequestV2.locks.clear();
 		for(int i = 0; i < myClient.clientRequests.size(); i++){
 			   int quorumPID = myClient.clientRequests.get(i).quorumMember.getPID();
 			    ClientRequestV2.sendRelease(quorumPID);
@@ -42,9 +42,9 @@ public class Application implements Runnable{
 			try{
 
 				csEnter();
-				System.out.println("ENDERING GRITIGAL SEGSION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ " + myClient.myHost.getMe().getPID() + " Clock : " + Clock.getValue());
+				Logger.log("ENDERING GRITIGAL SEGSION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "+ myClient.myHost.getMe().getPID() /*+ " Clock : " + Clock.getValue() + "Time : " + System.currentTimeMillis()*/);
 				criticalSection();
-				System.out.println("LEABING GRITIGAL SEGSION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ " + myClient.myHost.getMe().getPID() + " Clock : " + Clock.getValue()) ;
+			    Logger.log("LEABING GRITIGAL SEGSION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ " + myClient.myHost.getMe().getPID() /*+ " Clock : " + Clock.getValue() + "Time : " + System.currentTimeMillis()*/) ;
 				csExit();
 				Thread.sleep(Config.getRequestDelay());
 

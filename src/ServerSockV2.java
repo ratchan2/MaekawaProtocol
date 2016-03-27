@@ -17,9 +17,11 @@ public class ServerSockV2 implements Runnable{
 	public static PriorityQueue<Message> waitingQueue = new PriorityQueue<Message>(1000, new MessageComparator());
 	public static Map<Integer, PrintWriter> mapNodeWriter = new HashMap<Integer,PrintWriter>();
 	public static Message lockingRequest = null;
+	public static boolean haveInquired = false;
 	public String role;
 	public void setRole(String r){
 		role = r;
+		
 	}
 	public ServerSockV2(Socket s,TCPServer server, Host h){
 		socket = s;
@@ -70,7 +72,9 @@ public class ServerSockV2 implements Runnable{
 		if(lockingRequest != null && incomingMessage != null && lockingRequest.getClock() >= incomingMessage.getClock() && lockingRequest.getPID() > incomingMessage.getPID()){
 			inquire = true;
 			waitingQueue.add(incomingMessage);
+			if(!haveInquired){
 			sendInquire(lockingRequest.getPID());
+			}
 			incomingMessage = null;
 
 		}
@@ -90,6 +94,7 @@ public class ServerSockV2 implements Runnable{
 	}
 	public static void onReceiveRelease(Message incomingMessage){
 		Logger.log(myHost,"Got release from " + incomingMessage.getPID());
+	    haveInquired  = false;
 		boolean lock = false;
 			Logger.log(myHost, "Entered  receive ` block");
 			if(waitingQueue.isEmpty()){
@@ -110,9 +115,11 @@ public class ServerSockV2 implements Runnable{
 	public static void onReceiveYield(Message incomingMessage){
 		Logger.log(myHost,"Got yield from " + incomingMessage.getPID());
 		boolean lock = false;
-		if(lockingRequest != null && lockingRequest.getPID() != incomingMessage.getPID()){
-			return;
-		}
+//		if(lockingRequest != null && lockingRequest.getPID() != incomingMessage.getPID()){
+//			return;
+//		}
+		
+		    haveInquired = false;
 			if(!waitingQueue.isEmpty()){
 				waitingQueue.add(lockingRequest);	
 				lockingRequest = waitingQueue.remove();

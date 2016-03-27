@@ -4,7 +4,7 @@ import java.nio.file.StandardOpenOption;
 
 public class Logger{
 	public static boolean logsOff = false;
-	public synchronized static void log(Host h, String line){
+	public static void log(Host h, String line){
 		if(!logsOff){
 			System.out.println(h.getMe().getPID() + ">" + line);
 		}
@@ -16,5 +16,18 @@ public class Logger{
 //
 //			}
 //		}
+		
+		
 	}
+	
+	public static void log( String line){
+		try{
+			Files.write(Paths.get("foo.out"), (line + "\n").getBytes(), StandardOpenOption.APPEND);
+		}
+		catch(Exception e){
+
+		}
+	}
+	
+ 
 }

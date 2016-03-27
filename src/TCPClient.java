@@ -24,7 +24,7 @@ public class TCPClient implements Runnable{
     	}
     }
 	public synchronized static boolean hasLockedAll(){
-		if(lockingCount < quorumSize){
+		if(ClientRequestV2.locks.size() < quorumSize){
 			return false;
 		}
 		return true;

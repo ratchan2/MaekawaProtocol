@@ -23,6 +23,7 @@ public class ClientRequestV2 implements Runnable{
 		return hostPing;
 	}
 	String role;
+	public static HashMap<Integer,Boolean> locks = new HashMap<Integer,Boolean>();
 	public void setRole(String r){
 		role = r;
 	}
@@ -62,12 +63,13 @@ public class ClientRequestV2 implements Runnable{
 	}
 
 
-	public synchronized void onLocked(Message incomingMessage){
+	public synchronized static void onLocked(Message incomingMessage){
 //		synchronized(Process.cs){
 //			Process.cs.locks.put(quorumMember.getPID(),true);
 //		}
 		lockingCount++;
-		myClient.lockingCount = lockingCount;
+		locks.put(incomingMessage.getPID(), true);
+		//myClient.lockingCount = lockingCount;
 		Logger.log(myHost,"Received lock from  " + incomingMessage.getPID() + ",my locking count :" + lockingCount);
 		
 
@@ -85,8 +87,9 @@ public class ClientRequestV2 implements Runnable{
 		role = r;
 
 	}
-	public static void sendYield(int quorumPID){
+	public synchronized static void sendYield(int quorumPID){
 		Logger.log(myHost,"Sending yield to " + quorumPID);
+		locks.remove(quorumPID);
 		Clock.incrClock();
 		PrintWriter writer = writerMap.get(quorumPID);
 		writer.println("YIELD~" +myHost.getMe().getPID() + "~" + Clock.getValue());
