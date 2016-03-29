@@ -1,11 +1,13 @@
-
+import org.apache.commons.math3.distribution.ExponentialDistribution;
 public class Application implements Runnable{
 	TCPClient myClient;
 	public Host myHost;
 	public Application(TCPClient c){
 		myClient = c;
 	}
-	
+	 public static ExponentialDistribution csTimeDistribution = new ExponentialDistribution((double)Config.getCsTime());
+	 public static ExponentialDistribution requestDelayDistribution = new ExponentialDistribution((double)Config.getRequestDelay());
+		
 	public void csEnter() throws Exception{
 		myClient.onCsEnter();
 
@@ -26,10 +28,10 @@ public class Application implements Runnable{
 	}
 	public void criticalSection() throws Exception{
 
-		Thread.sleep(Config.getCsTime());
+		Thread.sleep((long)csTimeDistribution.sample());
 	}
 	public void run(){
-		for(int i = 0; i < Config.getNumberOfRequests() ; i++){
+	   for(int i = 0; i < Config.getNumberOfRequests() ; i++){
 
 			try{
 
@@ -38,7 +40,7 @@ public class Application implements Runnable{
 				criticalSection();
 			    Logger.log("LEABING GRITIGAL SEGSION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ " + myClient.myHost.getMe().getPID() /*+ " Clock : " + Clock.getValue() + "Time : " + System.currentTimeMillis()*/) ;
 				csExit();
-				Thread.sleep(Config.getRequestDelay());
+				Thread.sleep((long)requestDelayDistribution.sample());
 
 			}
 			catch(Exception e){

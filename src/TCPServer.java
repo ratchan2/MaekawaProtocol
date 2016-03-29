@@ -15,7 +15,10 @@ public class TCPServer implements Runnable{
 	public void run(){
 		try
 		{
+			//this is java handling tcp socket
 			ServerSocket serverSock = new ServerSocket(myHost.getMe().getPort());
+			//seversockv2 membership set handler as our process is of structure 
+//			P(Quorum--> our client will interact with it, Membership---> our server will have membership.size thread and one thread) 
 			ServerSockV2 consumer = new ServerSockV2(null,this,myHost);
 			consumer.setRole("CONSUMER");
 			Thread consumerThread = new Thread(consumer);

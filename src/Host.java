@@ -1,3 +1,4 @@
+//details about you and who your quorum members are
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.*;

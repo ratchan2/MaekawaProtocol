@@ -23,11 +23,15 @@ public class Process{
 	 
 	 public static ServerState ss = new ServerState();
 	 public static ClientState cs = new ClientState();
+	 
+	 // clock value for broadcast message for critical section request
 	 public static int sendingClock = 0;
 	 
 	 public static void main(String args[]) throws Exception{
+		 //config.java reader
 		 Config.setMe(Integer.parseInt(args[1]));
 		 Host h = Config.readFile(args[0]);
+		 
 		 Process.cs.quorumSize = h.quorumList.size();
 		 TCPServer server = new TCPServer();
 		 TCPClient client = new TCPClient(h,server);

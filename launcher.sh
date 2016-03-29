@@ -55,10 +55,10 @@ do
 done < temp
 
 #COMPILE ONLY ONCE. AND WAIT FOR 2s to reflect in other dc machines
-COPY="cp resources/foo.out foo.out"
+COPY="cp bin/foo.out foo.out"
 $COPY
 PROGRAM="Process.java"
-COMPILE="javac -sourcepath src src/$PROGRAM -d bin"
+COMPILE="javac -classpath bin/commons-math3-3.6.1.jar -sourcepath src src/$PROGRAM -d bin"
 $COMPILE
 sleep 2s
 

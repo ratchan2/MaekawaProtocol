@@ -150,7 +150,7 @@ public class ClientRequestV2 implements Runnable{
 		if(role.equals("PRODUCER")){
 		while(!signal){
 
-			try{
+			try{	
 
 				socket = new Socket(quorumMember.getHostName()+ ".utdallas.edu",quorumMember.getPort());
 				writerMap.put(quorumMember.getPID(),new PrintWriter(socket.getOutputStream()));	
