@@ -25,7 +25,7 @@ public class Process{
 	 public static ClientState cs = new ClientState();
 	 
 	 // clock value for broadcast message for critical section request
-	 public static int sendingClock = 0;
+	 public static String sendingClock;
 	 
 	 public static void main(String args[]) throws Exception{
 		 //config.java reader

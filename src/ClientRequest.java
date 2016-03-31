@@ -129,7 +129,7 @@ public class ClientRequest implements Runnable{
 
 				String  message = reader.readLine();
 				String [] tokens = message.split("[~]");
-				Clock.updateClock(Integer.parseInt(tokens[2]));
+				//Clock.updateClock(Integer.parseInt(tokens[2]));
 				Logger.log(myHost,"Mesage came :- " + message);
 				Message incomingMessage =  new Message(Integer.parseInt(tokens[2]),Integer.parseInt(tokens[1]),tokens[0]);
 				if(tokens[0].equals("LOCK")){

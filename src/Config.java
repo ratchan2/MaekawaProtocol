@@ -23,7 +23,10 @@ public class Config{
 	public static int getCsTime(){
 		return csTime;
 	}
-	
+	public static int getMe()
+	{
+		return me;
+	}
 	public static Host readFile(String filename)throws Exception{
 
 		FileReader reader = new FileReader(filename);

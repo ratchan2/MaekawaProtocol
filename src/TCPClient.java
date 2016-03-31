@@ -41,7 +41,7 @@ public class TCPClient implements Runnable{
 
 	public void onCsEnter(){
 		Clock.incrClock();
-		Process.sendingClock = Clock.getValue();
+		Process.sendingClock = Clock.getVectorClock();
       for(int i = 0; i < myHost.numberOfQuorumMembers; i++ ){
 //    	  Process.cs.locks.put(myHost.quorumList.get(i),false);
 //		  Process.cs.fails.put(myHost.quorumList.get(i),false);

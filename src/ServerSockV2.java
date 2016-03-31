@@ -70,7 +70,8 @@ public class ServerSockV2 implements Runnable{
 			incomingMessage = null;
 
 		}
-		if(lockingRequest != null && incomingMessage != null && lockingRequest.getClock() >= incomingMessage.getClock() && lockingRequest.getPID() > incomingMessage.getPID()){
+		if(lockingRequest != null && incomingMessage != null && lockingRequest.getClock() == incomingMessage.getClock() && lockingRequest.getPID() > incomingMessage.getPID()
+				||( lockingRequest != null && incomingMessage != null && lockingRequest.getClock() > incomingMessage.getClock()) ){
 			inquire = true;
 			waitingQueue.add(incomingMessage);
 			if(!haveInquired){
@@ -142,7 +143,7 @@ public class ServerSockV2 implements Runnable{
 		Logger.log(myHost,"Sending lock to " + pid);
 		Clock.incrClock();
 		PrintWriter currentWriter = mapNodeWriter.get(pid);
-		currentWriter.println("LOCK~" + myHost.getMe().getPID() + "~" + Clock.getValue());
+		currentWriter.println("LOCK~" + myHost.getMe().getPID() + "~" + Clock.getVectorClock());
 		currentWriter.flush();
 
 
@@ -152,7 +153,7 @@ public class ServerSockV2 implements Runnable{
 		Logger.log(myHost,"Sending fail to " + pid);
 		Clock.incrClock();
 		PrintWriter currentWriter = mapNodeWriter.get(pid);
-		currentWriter.println("FAIL~" + myHost.getMe().getPID() + "~" + Clock.getValue());
+		currentWriter.println("FAIL~" + myHost.getMe().getPID() + "~" + Clock.getVectorClock());
 		currentWriter.flush();
 
 	}
@@ -160,7 +161,7 @@ public class ServerSockV2 implements Runnable{
 		Logger.log(myHost,"Sending inquire to " + pid);
 		Clock.incrClock();
 		PrintWriter currentWriter = mapNodeWriter.get(pid);
-		currentWriter.println("INQUIRE~" + myHost.getMe().getPID() + "~" + Clock.getValue());
+		currentWriter.println("INQUIRE~" + myHost.getMe().getPID() + "~" + Clock.getVectorClock());
 		currentWriter.flush();
 
 	}
@@ -175,8 +176,8 @@ public class ServerSockV2 implements Runnable{
 
 					message = reader.readLine();
 					String []tokens = message.split("[~]");
-					Clock.updateClock(Integer.parseInt(tokens[2]));
-					Message incomingMessage  = new Message(Integer.parseInt(tokens[2]),Integer.parseInt(tokens[1]),tokens[0]);
+					Clock.updateVectorClock(Clock.readVector(tokens));
+					Message incomingMessage  = new Message(Clock.returnClockValue(tokens, Integer.parseInt(tokens[1])),Integer.parseInt(tokens[1]),tokens[0]);
 					Logger.log(myHost, incomingMessage.toString());
 						messageQueue.add(incomingMessage);
 				
@@ -184,7 +185,7 @@ public class ServerSockV2 implements Runnable{
 				}
 			}
 			catch(Exception e){
-
+				e.printStackTrace();
 			}
 
 		}

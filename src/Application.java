@@ -36,9 +36,9 @@ public class Application implements Runnable{
 			try{
 
 				csEnter();
-				Logger.log("ENDERING GRITIGAL SEGSION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "+ myClient.myHost.getMe().getPID() /*+ " Clock : " + Clock.getValue() + "Time : " + System.currentTimeMillis()*/);
+				Logger.log("ENDERING GRITIGAL SEGSION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ "+ myClient.myHost.getMe().getPID() + " " +Clock.getVectorClock()/*+ " Clock : " + Clock.getValue() + "Time : " + System.currentTimeMillis()*/);
 				criticalSection();
-			    Logger.log("LEABING GRITIGAL SEGSION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ " + myClient.myHost.getMe().getPID() /*+ " Clock : " + Clock.getValue() + "Time : " + System.currentTimeMillis()*/) ;
+			    Logger.log("LEABING GRITIGAL SEGSION ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ " + myClient.myHost.getMe().getPID() + " " +Clock.getVectorClock()/*+ " Clock : " + Clock.getValue() + "Time : " + System.currentTimeMillis()*/) ;
 				csExit();
 				Thread.sleep((long)requestDelayDistribution.sample());
 

@@ -62,6 +62,8 @@ public class ClientRequestV2 implements Runnable{
 		ClientRequestV2.locks.clear();
 		ClientRequestV2.setInCS(false);
 		whoInquired.clear();
+		Clock.incrClock();
+		Process.sendingClock = Clock.getVectorClock();
 	for(int i = 0; i < myClient.clientRequests.size(); i++){
 		   int quorumPID = myClient.clientRequests.get(i).quorumMember.getPID();
 		    ClientRequestV2.sendRelease(quorumPID);
@@ -124,7 +126,7 @@ public class ClientRequestV2 implements Runnable{
 		locks.remove(quorumPID);
 		Clock.incrClock();
 		PrintWriter writer = writerMap.get(quorumPID);
-		writer.println("YIELD~" +myHost.getMe().getPID() + "~" + Clock.getValue());
+		writer.println("YIELD~" +myHost.getMe().getPID() + "~" + Clock.getVectorClock());
 		writer.flush();
 	}
 	public  static void sendRequest(int quorumPID){
@@ -138,9 +140,9 @@ public class ClientRequestV2 implements Runnable{
 	}
 	public  static void sendRelease(int quorumPID){
 		Logger.log(myHost,"Sending release to " + quorumPID);
-		Clock.incrClock();
+		
 		PrintWriter writer = writerMap.get(quorumPID);
-		writer.println("RELEASE~" +myHost.getMe().getPID() + "~" + Clock.getValue());
+		writer.println("RELEASE~" +myHost.getMe().getPID() + "~" + Process.sendingClock);
 		writer.flush();
 
 	}
@@ -159,7 +161,7 @@ public class ClientRequestV2 implements Runnable{
 				
 			}
 			catch(Exception e){
-
+				//e.printStackTrace();
 			}
 		
 		}
@@ -171,13 +173,13 @@ public class ClientRequestV2 implements Runnable{
 
 				String  message = reader.readLine();
 				String tokens[] = message.split("[~]");
-				Clock.updateClock(Integer.parseInt(tokens[2]));
+				Clock.updateVectorClock(Clock.readVector(tokens));
 				Logger.log(myHost,"Mesage came :- " + message);
-				Message incomingMessage =  new Message(Integer.parseInt(tokens[2]),Integer.parseInt(tokens[1]),tokens[0]);
+				Message incomingMessage =  new Message(Clock.returnClockValue(tokens, Integer.parseInt(tokens[1])),Integer.parseInt(tokens[1]),tokens[0]);
 				messageQueue.add(incomingMessage);
 
 			} catch (IOException e) {
-				
+			    e.printStackTrace();	
 			}
 
 
@@ -205,7 +207,7 @@ public class ClientRequestV2 implements Runnable{
 					
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
-					
+					e.printStackTrace();
 				}
 			 }
 		}
