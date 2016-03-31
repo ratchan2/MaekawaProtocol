@@ -55,10 +55,10 @@ do
 done < temp
 
 #COMPILE ONLY ONCE. AND WAIT FOR 2s to reflect in other dc machines
-COPY="cp bin/foo.out foo.out"
+COPY="cp resources/foo.out foo.out"
 $COPY
 PROGRAM="Process.java"
-COMPILE="javac -classpath bin/commons-math3-3.6.1.jar -sourcepath src src/$PROGRAM -d bin"
+COMPILE="javac -classpath resouces/commons-math3-3.6.1.jar -sourcepath src src/$PROGRAM -d bin"
 $COMPILE
 sleep 2s
 
@@ -71,7 +71,7 @@ do
 	neighbors=${neighbors_dict["$node_id"]}
 	#echo $netid@$host "java $PROG $node_id '$nodes_location' '$neighbors' '$minPerActive' '$maxPerActive' \
 	#'$sendMinDelay' '$snapshotDelay' '$maxNumber' '$config_file_name' " &
-	ssh -o StrictHostKeyChecking=no $netid@$host "cd $(pwd);java -cp bin Process $CONFIG $node_id '$nodes_location' '$neighbors' '$node_count' '$minPerActive' '$maxPerActive' \
+	ssh -o StrictHostKeyChecking=no $netid@$host "cd $(pwd);java -cp bin:resources/* Process $CONFIG $node_id '$nodes_location' '$neighbors' '$node_count' '$minPerActive' '$maxPerActive' \
 	'$sendMinDelay' '$snapshotDelay' '$maxNumber' '$config_file_name' " &
       # echo $host
 done
