@@ -71,6 +71,10 @@ do
 	neighbors=${neighbors_dict["$node_id"]}
 	#echo $netid@$host "java $PROG $node_id '$nodes_location' '$neighbors' '$minPerActive' '$maxPerActive' \
 	#'$sendMinDelay' '$snapshotDelay' '$maxNumber' '$config_file_name' " &
+	COPY="cp resources/foo.out foo-"$node_id".out"
+	$COPY
+	COPY="cp resources/foo.out logs-"$node_id".out"
+	$COPY
 	ssh -o StrictHostKeyChecking=no $netid@$host "cd $(pwd);java -cp bin:resources/* Process $CONFIG $node_id '$nodes_location' '$neighbors' '$node_count' '$minPerActive' '$maxPerActive' \
 	'$sendMinDelay' '$snapshotDelay' '$maxNumber' '$config_file_name' " &
       # echo $host

@@ -62,7 +62,10 @@ public class ServerSockV2 implements Runnable{
 		} 
 
 		if((lockingRequest != null && incomingMessage != null && lockingRequest.getClock() < incomingMessage.getClock())
-				|| (lockingRequest != null && incomingMessage != null && lockingRequest.getClock() == incomingMessage.getClock() && lockingRequest.getPID() < incomingMessage.getPID())){
+				|| (lockingRequest != null && incomingMessage != null && lockingRequest.getClock() == incomingMessage.getClock() && lockingRequest.getPID() < incomingMessage.getPID())
+				|| ( !waitingQueue.isEmpty() && incomingMessage != null && waitingQueue.peek().getClock() < incomingMessage.getClock())
+				|| (!waitingQueue.isEmpty() && incomingMessage != null && waitingQueue.peek().getClock() == incomingMessage.getClock() && waitingQueue.peek().getPID() < incomingMessage.getPID())){
+			    
 			waitingQueue.add(incomingMessage);
 			fail = true;
 			sendFail(incomingMessage.getPID());
@@ -70,7 +73,7 @@ public class ServerSockV2 implements Runnable{
 			incomingMessage = null;
 
 		}
-		if(lockingRequest != null && incomingMessage != null && lockingRequest.getClock() == incomingMessage.getClock() && lockingRequest.getPID() > incomingMessage.getPID()
+		if((lockingRequest != null && incomingMessage != null && lockingRequest.getClock() == incomingMessage.getClock() && lockingRequest.getPID() > incomingMessage.getPID())
 				||( lockingRequest != null && incomingMessage != null && lockingRequest.getClock() > incomingMessage.getClock()) ){
 			inquire = true;
 			waitingQueue.add(incomingMessage);
@@ -100,7 +103,7 @@ public class ServerSockV2 implements Runnable{
 		boolean lock = false;
 			Logger.log(myHost, "Entered  receive ` block");
 			if(waitingQueue.isEmpty()){
-				lockingRequest = null;
+				lockingRequest = null;	
 			}
 			else{
 				lock = true;
@@ -120,17 +123,18 @@ public class ServerSockV2 implements Runnable{
 //		if(lockingRequest != null && lockingRequest.getPID() != incomingMessage.getPID()){
 //			return;
 //		}
-		
+		if(lockingRequest != null && incomingMessage.getPID() != lockingRequest.getPID() || (lockingRequest != null && incomingMessage.getPID() == lockingRequest.getPID() && incomingMessage.getClock() < lockingRequest.getClock())){
+			return;
+		}
 		    haveInquired = false;
 			if(!waitingQueue.isEmpty()){
+				
 				waitingQueue.add(lockingRequest);	
 				lockingRequest = waitingQueue.remove();
 				sendLock(lockingRequest.getPID());
 
 			}
-			else{
-				lockingRequest = null;
-			}
+	
 
 		
 

@@ -39,7 +39,7 @@ public class Process{
 		 client.setData(server,h);
 		 server.setData(client,h);
 		 app.setData(h);
-		 Logger.logsOff = true;
+		 Logger.logsOff = false;
 	     Thread serverThread = new Thread(server);
 	     Thread clientThread = new Thread(client);
 	     Thread applicationThread = new Thread(app);
