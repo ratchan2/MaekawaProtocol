@@ -140,7 +140,7 @@ public class ServerSockV2 implements Runnable{
 
 		
 			
-		
+			
 
 	}
 	public static void sendLock(int pid){
