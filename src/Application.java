@@ -36,9 +36,9 @@ public class Application implements Runnable{
 			try{
 
 				csEnter();
-				Logger.log("E~" + Clock.getVectorClock()/*+ " Clock : " + Clock.getValue() + "Time : " + System.currentTimeMillis()*/);
+				Logger.log("E~" + Config.getMe() + "~" + Clock.getVectorClock());
 				criticalSection();
-			    Logger.log("L~" + Clock.getVectorClock()/*+ " Clock : " + Clock.getValue() + "Time : " + System.currentTimeMillis()*/) ;
+			    Logger.log("L~" + Config.getMe()+ "~" + Clock.getVectorClock()) ;
 				csExit();
 				Thread.sleep((long)requestDelayDistribution.sample());
 

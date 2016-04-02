@@ -17,11 +17,23 @@ class VectorComparator implements Comparator<Vector>{
 			}
 		}
 		if(lessThan == false && greaterThan == false){
-			System.out.println("NO!");
+			System.out.println("NO! PROTOCOL DOES NOT WORK!");
 			System.exit(0);
 		}
 		
 		if(lessThan == true){
+			if(x.pid == y.pid && x.type.equals("L") && y.type.equals("E")){
+				boolean equals = true;
+			    for(int i = 0; i < x.myArray.length; i++){
+			    	if(x.myArray[i] != y.myArray[i]){
+			    		equals = false;
+			    		break;
+			    	}
+			    }
+				 if(equals == true){
+					 return 1;
+				 }
+			}
 			return -1;
 		}
 		
@@ -31,34 +43,50 @@ class VectorComparator implements Comparator<Vector>{
 }
 public class Vector { 
 	int [] myArray;
-    public Vector(int [] arr){
-    	myArray = arr;
+	String type;
+	int pid;
+	String line;
+    public Vector(String line){
+    	String tokens[]  = line.split("[~]");
+    	    this.line = line;
+    	    type = tokens[0];
+    	    pid = Integer.parseInt(tokens[1]);
+    	    myArray = new int[tokens.length -2];
+    	for(int i = 0; i < myArray.length; i++){
+    		myArray[i] = Integer.parseInt(tokens[i+2]);
+    	}    
     }
     public void setVector(int []arr){
     	myArray = arr;
     }
-    public static void main(String args[]){
-    	int numberOfNodes = Integer.parseInt(1);
-    	int maxSize = Integer.parseInt(args[2]);
-    	PriorityQueue<Vector> queue = new PriorityQueue(numberOfNodes*maxSize, new VectorComparator());
+    public static void main (String args[]) throws Exception{
+    	int numberOfNodes = Integer.parseInt(args[0]);
+    	int maxSize = Integer.parseInt(args[1]);
+    	//PriorityQueue<Vector> queue = new PriorityQueue(numberOfNodes*maxSize, new VectorComparator());
+    	ArrayList<Vector> list = new ArrayList<Vector>();
     	for(int i = 0; i < numberOfNodes; i++){
     		String filename = "foo-" + i + ".out";
     		FileReader reader = new FileReader(filename);
     		String line = null;
     		BufferedReader file = new BufferedReader(reader);
     		while((line = file.readLine()) != null){
-    			 String tokens [] = line.split("[~]");
-    			 tokens =  Arrays.copyOfRange(tokens, 1, tokens.length);
-    			 int arr[] = new int[tokens.length];
-    			 for(int i = 0; i < tokens.length; i++){
-    				  arr[i] = Integer.parseInt(tokens[i]);
-    			 }
-    			 queue.add(new Vector(arr));
+    			 list.add(new Vector(line));
     		}
     	   file.close();
     	}
     	
-    	System.out.println("NO CONCURRENT CRITICAL SECTIONS!");
+    	Collections.sort(list, new VectorComparator());
+    	Iterator<Vector> iterate = list.iterator() ;
     	
+		while(iterate.hasNext() ) {
+		    Vector x = iterate.next();
+		    Vector y = iterate.next();
+		    if(x.type.equals("E") && y.type.equals("E")){
+		    	System.out.println("NO!");
+		    	return;
+		    }
+		    
+		  }
+		System.out.println("NO CONCURRENT CRITICAL SECTIONS!");
     }
 }
