@@ -1,4 +1,5 @@
 import java.io.BufferedReader;
+import java.io.*;
 import java.io.FileReader;
 import java.util.Scanner;
 import java.util.*;
@@ -29,8 +30,10 @@ public class Config{
 	}
 	public static Host readFile(String filename)throws Exception{
 
-		FileReader reader = new FileReader(filename);
+		File myFile = new File(filename);
+		FileReader reader = new FileReader(myFile);
 		String line = null;
+		
 		BufferedReader file = new BufferedReader(reader);
 		boolean paramsParsed = false;
 		int hostsCount = 0;
@@ -39,7 +42,7 @@ public class Config{
 		HashMap<String,Integer> hostMap = new HashMap<String,Integer>();
 		while((line = file.readLine()) != null){
 		
-			if(line.length() == 0 || (line.charAt(0) == '#')){
+			if(line.trim().length() == 0 || line.startsWith("#")){
 				continue;
 			}
 			Scanner sc = new Scanner(line);
