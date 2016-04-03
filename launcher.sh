@@ -58,7 +58,7 @@ done < temp
 COPY="cp resources/foo.out foo.out"
 $COPY
 PROGRAM="Process.java"
-COMPILE="javac -classpath resouces/commons-math3-3.6.1.jar -sourcepath src src/$PROGRAM -d bin"
+COMPILE="javac -classpath resources/commons-math3-3.6.1.jar -sourcepath src src/$PROGRAM -d bin"
 $COMPILE
 sleep 2s
 
